@@ -1,0 +1,24 @@
+{
+  "name": "chitti",
+  "version": "1.0.0",
+  "description": "This is simple webservice for chit funding",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sameerq7/Crowd-Funding.git"
+  },
+  "keywords": [
+    "chit",
+    "funding"
+  ],
+  "author": "Sameer Hussain",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sameerq7/Crowd-Funding/issues"
+  },
+  "homepage": "https://github.com/Sameerq7/Crowd-Funding#readme"
+}
