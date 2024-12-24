@@ -185,6 +185,37 @@
         let names = [];
         let pastSets = [];
 
+        async function loadPastSets() {
+            const response = await fetch('pastSets.json');
+            if (response.ok) {
+                const data = await response.json();
+                pastSets = Object.keys(data).map(key => {
+                    return { 
+                        setId: key, 
+                        names: data[key], 
+                        date: new Date(parseInt(key.replace('set-', ''))).toLocaleString() 
+                    };
+                });
+
+                pastSets.sort((a, b) => new Date(b.setId.replace('set-', '')) - new Date(a.setId.replace('set-', '')));
+                updatePastSetsList();
+            }
+        }
+
+        function updatePastSetsList() {
+            const pastSetsList = document.getElementById("past-sets-list");
+            pastSetsList.innerHTML = pastSets.slice(0, 5).map(set => {
+                return `
+                    <li>
+                        <strong>${set.date}</strong> - <em>${set.setId}</em>
+                        <ul>
+                            ${set.names.map(name => `<li>${name}</li>`).join('')}
+                        </ul>
+                    </li>
+                `;
+            }).join("");
+        }
+
         function addName() {
             const nameInput = document.getElementById("name-input");
             const name = nameInput.value.trim();
@@ -212,7 +243,21 @@
             });
             if (response.ok) {
                 alert("Set saved successfully!");
-                pastSets.push({ name: names.join(", "), date: new Date().toLocaleString() });
+                const setId = `set-${Date.now()}`;
+                const newSet = { [setId]: names };
+
+                await fetch("pastSets.json", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newSet),
+                });
+
+                pastSets.unshift({
+                    setId: setId,
+                    names: names,
+                    date: new Date().toLocaleString(),
+                });
+
                 updatePastSetsList();
                 names = [];
                 updateNamesList();
@@ -226,6 +271,10 @@
         function viewPastSets() {
             window.location.href = "past-set.html";
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadPastSets(); // Load past sets when the page is loaded
+        });
     </script>
 </body>
 </html>
