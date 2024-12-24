@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shuffle and Pick Winner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://www.google.com/imgres?q=CELEBRATION%20AND%20FIREWORKS&imgurl=https%3A%2F%2Fwww.shutterstock.com%2Fimage-photo%2Ffriends-happy-looks-holiday-fireworks-260nw-538768309.jpg&imgrefurl=https%3A%2F%2Fwww.shutterstock.com%2Fsearch%2Fcelebrate-fireworks&docid=cSlCxXpNUBsYuM&tbnid=qmzN0t3NCkuxOM&vet=12ahUKEwjpm5uGrcCKAxWjcmwGHaz2APcQM3oECGkQAA..i&w=390&h=280&hcb=2&ved=2ahUKEwjpm5uGrcCKAxWjcmwGHaz2APcQM3oECGkQAA');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 3em;
+            color: #ffd700;
+        }
+
+        h3 {
+            margin: 10px 0;
+            font-size: 1.5em;
+            color: #000000;
+        }
+
+        h2 {
+            margin: 20px 0;
+            font-size: 2em;
+            color: #ff4500;
+        }
+
+        #participants-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        #participants-list li {
+            margin: 5px 0;
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #000;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        #shuffle-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #ff4500;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #shuffle-btn:hover {
+            background-color: #ffd700;
+            color: #000;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 1em;
+            color: #ccc;
+        }
+
+        @keyframes winnerAnimation {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        #winner-name {
+            animation: winnerAnimation 2s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎉 Shuffle and Pick Winner 🎉</h1>
+    <h3 id="set-name"></h3>
+    <div id="participants-list"></div>
+    <button id="shuffle-btn">🔀 Shuffle & Pick Winner</button>
+    <h2 id="winner-name"></h2>
+    <footer>
+        Let the luckiest participant win! 🍀
+    </footer>
+
+    <script>
+        let setName = ""; // Global variable to hold the set name
+
+        // Fetch participants from the server
+        async function fetchParticipants() {
+            const urlParams = new URLSearchParams(window.location.search);
+            setName = urlParams.get('setName');
+            if (!setName) {
+                alert("No set selected.");
+                return;
+            }
+
+            document.getElementById("set-name").innerText = `Set Name: ${setName} 🏆`;
+            document.getElementById("shuffle-btn").innerText = `🔀 Shuffle & Pick Winner from ${setName}`;
+
+            try {
+                const response = await fetch(`/get-set/${setName}`);
+                if (!response.ok) throw new Error("Failed to fetch participants.");
+                const data = await response.json();
+                const participantsList = document.getElementById("participants-list");
+                participantsList.innerHTML = "<h3>Participants</h3><ul>";
+
+                data.names.forEach(name => {
+                    const li = document.createElement("li");
+                    li.innerText = name;
+                    participantsList.appendChild(li);
+                });
+
+                participantsList.innerHTML += "</ul>";
+            } catch (error) {
+                alert("Error fetching participants: " + error.message);
+            }
+        }
+
+        // Shuffle participants and display the winner
+        async function shuffleAndDisplayWinner() {
+            if (!setName) {
+                alert("Set name is not defined.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/shuffle/${setName}`, { method: "POST" });
+                if (!response.ok) throw new Error("Failed to shuffle set.");
+
+                const data = await response.json();
+                const winnerName = data.winner;
+
+                const winnerElement = document.getElementById("winner-name");
+                winnerElement.innerHTML = `🎊 Winner from <strong>${setName}</strong>: ${winnerName} 🏆`;
+
+                // Update remaining participants
+                const participantsList = document.getElementById("participants-list");
+                participantsList.innerHTML = "<h3>Remaining Participants</h3><ul>";
+                data.remaining.forEach(name => {
+                    const li = document.createElement("li");
+                    li.innerText = name;
+                    participantsList.appendChild(li);
+                });
+                participantsList.innerHTML += "</ul>";
+
+            } catch (error) {
+                alert("Error picking winner: " + error.message);
+            }
+        }
+
+        // Add event listener to the shuffle button
+        document.getElementById("shuffle-btn").addEventListener("click", shuffleAndDisplayWinner);
+
+        // Fetch participants on page load
+        fetchParticipants();
+    </script>
+</body>
+
+</html>

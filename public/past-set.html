@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Sets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #007BFF;
+            text-align: center;
+        }
+        .set {
+            background: #e0e0e0;
+            margin: 10px 0;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .set:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .set-name {
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: rgb(255, 195, 195);
+            color: rgb(7, 0, 0);
+            text-align: left;
+        }
+        .set-name:hover {
+            background-color: #0056b3;
+        }
+        .participants {
+            display: none;
+            padding: 10px;
+            background: #f9f9f9;
+            border-top: 1px solid #ccc;
+        }
+        .participants li {
+            margin: 5px 0;
+        }
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #deleteAll {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Past Sets</h1>
+    <div id="setList"></div>
+    <button id="deleteAll">Delete All Sets</button>
+
+    <script>
+        async function fetchSets() {
+            const setList = document.getElementById("setList");
+            setList.innerHTML = "<div>Loading...</div>";
+    
+            try {
+                const response = await fetch("/get-past-sets");
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+                setList.innerHTML = ""; // Clear the loading message
+    
+                if (data && typeof data === "object") {
+                    Object.entries(data).forEach(([setName, names]) => {
+                        if (Array.isArray(names)) {
+                            const setDiv = document.createElement("div");
+                            setDiv.className = "set";
+    
+                            const setNameDiv = document.createElement("div");
+                            setNameDiv.className = "set-name";
+                            setNameDiv.textContent = setName;
+    
+                            const participantsDiv = document.createElement("ul");
+                            participantsDiv.className = "participants";
+                            names.forEach(name => {
+                                const listItem = document.createElement("li");
+                                listItem.textContent = name;
+                                participantsDiv.appendChild(listItem);
+                            });
+    
+                            const deleteBtn = document.createElement("span");
+                            deleteBtn.className = "delete-btn";
+                            deleteBtn.textContent = "Delete";
+                            deleteBtn.onclick = () => deleteSet(setName);
+    
+                            setNameDiv.addEventListener("click", () => {
+                                const isVisible = participantsDiv.style.display === "block";
+                                participantsDiv.style.display = isVisible ? "none" : "block";
+                            });
+    
+                            setDiv.appendChild(setNameDiv);
+                            setDiv.appendChild(participantsDiv);
+                            setDiv.appendChild(deleteBtn);
+                            setList.appendChild(setDiv);
+                        } else {
+                            console.error(`Expected an array for ${setName}, but got:`, names);
+                        }
+                    });
+                } else {
+                    setList.innerHTML = "<div>Error: Invalid data format</div>";
+                    console.error("Invalid response format:", data);
+                }
+            } catch (error) {
+                setList.innerHTML = "<div>Error fetching data</div>";
+                console.error("Fetch error:", error);
+            }
+        }
+    
+        async function deleteSet(setName) {
+            if (confirm(`Are you sure you want to delete the set "${setName}"?`)) {
+                try {
+                    const response = await fetch("/delete-set", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            setName,
+                            page: "past-sets"  // Added context to let the server know it's from the past-sets page
+                        })
+                    });
+    
+                    if (response.ok) {
+                        alert(`Set "${setName}" deleted successfully.`);
+                        fetchSets(); // Refresh the sets
+                    } else {
+                        alert("Failed to delete set.");
+                    }
+                } catch (error) {
+                    alert("Error deleting set.");
+                    console.error("Error:", error);
+                }
+            }
+        }
+    
+        async function deleteAllSets() {
+            if (confirm("Are you sure you want to delete all sets?")) {
+                try {
+                    const response = await fetch("/delete-set", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            setName: "all",
+                            page: "past-sets"  // Added context to let the server know it's from the past-sets page
+                        })
+                    });
+    
+                    if (response.ok) {
+                        alert("All sets deleted successfully.");
+                        fetchSets(); // Refresh the sets
+                    } else {
+                        alert("Failed to delete all sets.");
+                    }
+                } catch (error) {
+                    alert("Error deleting all sets.");
+                    console.error("Error:", error);
+                }
+            }
+        }
+    
+        document.getElementById("deleteAll").addEventListener("click", deleteAllSets);
+    
+        // Fetch data on page load
+        fetchSets();
+    </script>
+    
+</body>
+</html>

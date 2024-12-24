@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chitti Prize Winner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #names-list, #sets-list {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            max-width: 300px;
+            background-color: #f9f9f9;
+        }
+        #winner {
+            margin-top: 20px;
+            font-weight: bold;
+            color: green;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chitti Fund Winner</h1>
+    <div>
+        <h3>Select a Set</h3>
+        <div id="sets-list">
+            <ul id="set-display"></ul>
+        </div>
+    </div>
+
+    <div id="add-names-section">
+        <p>Enter names one by one for a new set:</p>
+        <input type="text" id="name-input" placeholder="Enter a name">
+        <button onclick="addName()">Add Name</button>
+        <button onclick="createSet()">Create Set</button>
+    </div>
+
+    <div id="names-list" class="hidden">
+        <h3>Names in Selected Set:</h3>
+        <ul id="name-display"></ul>
+        <button onclick="shuffleWinner()">Shuffle Winner</button>
+    </div>
+
+    <div id="winner"></div>
+
+    <script>
+        let names = [];
+        let currentSet = null;
+        let sets = {};
+
+        // Load existing sets from server
+        async function loadSets() {
+            const response = await fetch("/sets");
+            sets = await response.json();
+            updateSetList();
+        }
+
+        // Update UI for set list
+        function updateSetList() {
+            const setDisplay = document.getElementById("set-display");
+            setDisplay.innerHTML = Object.keys(sets).map(
+                set => `<li><button onclick="selectSet('${set}')">${set}</button></li>`
+            ).join("");
+        }
+
+        // Add a name to the new set
+        function addName() {
+            const nameInput = document.getElementById("name-input");
+            const name = nameInput.value.trim();
+            if (name) {
+                names.push(name);
+                updateNamesList(names);
+                nameInput.value = "";
+            }
+        }
+
+        // Update name display
+        function updateNamesList(namesToDisplay) {
+            const nameDisplay = document.getElementById("name-display");
+            nameDisplay.innerHTML = namesToDisplay.map(n => `<li>${n}</li>`).join("");
+        }
+
+        // Create a new set
+        async function createSet() {
+            if (names.length === 0) {
+                alert("Please enter some names to create a set.");
+                return;
+            }
+
+            const response = await fetch("/create-set", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ names }),
+            });
+
+            const result = await response.json();
+            alert("Set created successfully!");
+            sets[result.setName] = names;
+            names = [];
+            updateNamesList(names);
+            updateSetList();
+        }
+
+        // Select a set
+        function selectSet(setName) {
+            currentSet = setName;
+            names = sets[setName];
+            document.getElementById("add-names-section").classList.add("hidden");
+            document.getElementById("names-list").classList.remove("hidden");
+            updateNamesList(names);
+        }
+
+        // Shuffle to select a winner
+        async function shuffleWinner() {
+            if (!currentSet || names.length === 0) {
+                alert("No set selected or no names available.");
+                return;
+            }
+
+            const response = await fetch(`/shuffle/${currentSet}`, {
+                method: "POST",
+            });
+
+            const result = await response.json();
+            document.getElementById("winner").innerText = `Congratulations ${result.winner}! You won the Chitti Fund money!`;
+            names = result.remaining;
+            sets[currentSet] = names;
+            updateNamesList(names);
+        }
+
+        // Load sets on page load
+        loadSets();
+    </script>
+</body>
+</html>
