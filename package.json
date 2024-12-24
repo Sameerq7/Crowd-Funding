@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/Sameerq7/Crowd-Funding/issues"
   },
-  "homepage": "https://github.com/Sameerq7/Crowd-Funding#readme"
+  "homepage": "https://github.com/Sameerq7/Crowd-Funding#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
 }
