@@ -11,7 +11,7 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            background-image: url('https://www.google.com/imgres?q=CELEBRATION%20AND%20FIREWORKS&imgurl=https%3A%2F%2Fwww.shutterstock.com%2Fimage-photo%2Ffriends-happy-looks-holiday-fireworks-260nw-538768309.jpg&imgrefurl=https%3A%2F%2Fwww.shutterstock.com%2Fsearch%2Fcelebrate-fireworks&docid=cSlCxXpNUBsYuM&tbnid=qmzN0t3NCkuxOM&vet=12ahUKEwjpm5uGrcCKAxWjcmwGHaz2APcQM3oECGkQAA..i&w=390&h=280&hcb=2&ved=2ahUKEwjpm5uGrcCKAxWjcmwGHaz2APcQM3oECGkQAA');
+            background-image: url('/images/celebration.jpg');
             background-size: cover;
             background-position: center;
             color: #fff;
@@ -72,6 +72,22 @@
             color: #ccc;
         }
 
+        footer .social-links a {
+            color: #ffd700;
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 1.5em;
+        }
+
+        footer .social-links a:hover {
+            color: #ff4500;
+        }
+
+        footer p {
+            margin-top: 10px;
+            font-size: 1em;
+        }
+
         @keyframes winnerAnimation {
             0% {
                 transform: scale(1);
@@ -98,8 +114,15 @@
     <div id="participants-list"></div>
     <button id="shuffle-btn">🔀 Shuffle & Pick Winner</button>
     <h2 id="winner-name"></h2>
+
     <footer>
-        Let the luckiest participant win! 🍀
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/shaik-sameer-hussain-b88323250/" target="_blank" title="LinkedIn">LinkedIn</a>
+            <a href="https://www.instagram.com/your_username" target="_blank" title="Instagram">Instagram</a>
+            <a href="https://github.com/Sameerq7" target="_blank" title="GitHub">GitHub</a>
+            <a href="https://www.facebook.com/your_username" target="_blank" title="Facebook">Facebook</a>
+        </div>
+        <p>Designed by Shaik Sameer Hussain 🚀</p>
     </footer>
 
     <script>

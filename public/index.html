@@ -11,25 +11,44 @@
             padding: 0;
             box-sizing: border-box;
             background-color: #f0f8ff;
+            transition: background-color 0.3s ease;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
         }
         #names-list, #past-sets {
             margin-top: 10px;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ddd;
             max-width: 90%;
             background-color: #f9f9f9;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        #names-list:hover, #past-sets:hover {
+            transform: scale(1.05);
         }
         #winner {
             margin-top: 20px;
             font-weight: bold;
             color: green;
+            font-size: 1.3rem;
+            animation: bounce 1s infinite alternate;
         }
         .button-container {
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            animation: fadeInUp 1s ease-out;
         }
         button {
-            padding: 10px 15px;
+            padding: 10px 20px;
             margin: 5px;
             border: none;
             border-radius: 5px;
@@ -37,9 +56,11 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         button:hover {
             background-color: #0056b3;
+            transform: translateY(-3px);
         }
         input[type="text"] {
             padding: 10px;
@@ -48,6 +69,10 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            border-color: #007bff;
         }
         footer {
             width: 100%;
@@ -57,6 +82,8 @@
             margin-top: 40px;
             text-align: center;
             font-size: 14px;
+            position: relative;
+            animation: fadeInUp 1.5s ease-out;
         }
         footer a {
             color: #007bff;
@@ -67,8 +94,12 @@
         }
         .social-icons a {
             margin: 0 10px;
-            font-size: 18px;
+            font-size: 20px;
             color: #fff;
+            transition: color 0.3s ease;
+        }
+        .social-icons a:hover {
+            color: #007bff;
         }
         @media (max-width: 600px) {
             button, input[type="text"] {
@@ -77,6 +108,41 @@
             }
             footer {
                 font-size: 12px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0);
             }
         }
     </style>
@@ -159,15 +225,7 @@
 
         function viewPastSets() {
             window.location.href = "past-set.html";
-            // const pastSetsSection = document.getElementById("past-sets");
-            // pastSetsSection.style.display = pastSets.length > 0 ? "block" : "none";
-            // updatePastSetsList();
         }
-
-        // function updatePastSetsList() {
-        //     const pastSetsList = document.getElementById("past-sets-list");
-        //     pastSetsList.innerHTML = pastSets.map(set => `<li><strong>${set.name}</strong> - ${set.date}</li>`).join("");
-        // }
     </script>
 </body>
 </html>

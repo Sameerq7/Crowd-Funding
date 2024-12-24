@@ -57,7 +57,7 @@
             display: block;
             margin: 20px auto;
             padding: 10px 20px;
-            background-color: #ff6347;
+            background-color: #e10101;
             color: white;
             border: none;
             border-radius: 5px;
@@ -133,7 +133,7 @@
         async function deleteSet(setName) {
             if (confirm(`Are you sure you want to delete the set "${setName}"?`)) {
                 try {
-                    const response = await fetch("/delete-set", {
+                    const response = await fetch("/delete-set-past", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -160,7 +160,7 @@
         async function deleteAllSets() {
             if (confirm("Are you sure you want to delete all sets?")) {
                 try {
-                    const response = await fetch("/delete-set", {
+                    const response = await fetch("/delete-set-past", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"

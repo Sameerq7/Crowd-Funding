@@ -90,6 +90,29 @@ app.post("/delete-set", (req, res) => {
         return res.status(404).send("Set not found.");
     }
 });
+app.post("/delete-set-past", (req, res) => {
+    const { setName } = req.body;
+
+    if (!setName) {
+        return res.status(400).send("Set name is required.");
+    }
+
+    if (setName === 'all') {
+        // Delete all sets from pastSets.json
+        pastData = {};  // Clear the pastData object
+        fs.writeFileSync("pastSets.json", JSON.stringify(pastData, null, 2));
+        return res.status(200).send("All past sets deleted successfully.");
+    }
+
+    if (pastData[setName]) {
+        // Delete a specific set from pastData
+        delete pastData[setName];
+        fs.writeFileSync("pastSets.json", JSON.stringify(pastData, null, 2));
+        return res.status(200).send(`Set '${setName}' deleted successfully from past sets.`);
+    } else {
+        return res.status(404).send("Set not found in past sets.");
+    }
+});
 
 // Shuffle a set and select a winner
 app.post("/shuffle/:setName", (req, res) => {
