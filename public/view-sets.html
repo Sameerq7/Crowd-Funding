@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Sets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .set {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .set h3 {
+            margin: 0;
+            display: inline;
+        }
+
+        .dropdown {
+            margin-top: 10px;
+        }
+
+        .dropdown ul {
+            list-style: none;
+            padding-left: 0;
+            display: none;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .dropdown ul li {
+            padding: 5px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dropdown ul li:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown.active ul {
+            display: block;
+        }
+
+        .actions button {
+            margin-right: 5px;
+        }
+
+        .delete-all {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        footer {
+            background-color: #f1f1f1;
+            padding: 20px;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        footer .social-icons {
+            margin: 10px 0;
+        }
+
+        footer .social-icons a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+        }
+
+        footer .social-icons a:hover {
+            color: #0073e6;
+        }
+
+        footer a {
+            color: #0073e6;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            footer .social-icons a {
+                font-size: 16px;
+            }
+
+            .delete-all {
+                width: 100%;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Manage Sets</h1>
+    <button class="delete-all" onclick="deleteAllSets()">Delete All Sets</button>
+    <div id="sets-container"></div>
+    <footer>
+        <div>
+            <p>Follow Me:</p>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/shaiksameer.hussain.12" target="_blank">Facebook</a>
+                <a href="https://www.linkedin.com/in/shaik-sameer-hussain-b88323250/" target="_blank">LinkedIn</a>
+                <a href="https://www.instagram.com/h_shaiksameer" target="_blank">Instagram</a>
+                <a href="https://github.com/Sameerq7" target="_blank">GitHub</a>
+            </div>
+            <p>Contact: <a href="mailto:9121sameer@gmail.com">9121sameer@gmail.com</a> | <a href="tel:+919121700886">+91 9121700886</a></p>
+            <p>&copy; 2024 Chitti Fund Winner. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        async function fetchSets() {
+            try {
+                const response = await fetch("/get-sets");
+                if (!response.ok) throw new Error("Failed to fetch sets.");
+                const data = await response.json();
+                const container = document.getElementById("sets-container");
+                container.innerHTML = "";
+
+                // Sort the sets by timestamp (most recent first)
+                const sortedSets = Object.entries(data).sort(([a], [b]) => b.localeCompare(a));
+
+                for (const [setName, names] of sortedSets) {
+                    const setDiv = document.createElement("div");
+                    setDiv.className = "set";
+
+                    const header = document.createElement("h3");
+                    header.innerText = setName;
+
+                    const editButton = document.createElement("button");
+                    editButton.innerText = "Rename";
+                    editButton.onclick = () => renamePrompt(setName);
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.innerText = "Delete";
+                    deleteButton.onclick = () => deleteSet(setName);
+
+                    const shuffleButton = document.createElement("button");
+                    shuffleButton.innerText = "Shuffle & Pick Winner";
+                    shuffleButton.onclick = () => shuffleAndPickWinner(setName);
+
+                    const dropdown = document.createElement("div");
+                    dropdown.className = "dropdown";
+
+                    const dropdownHeader = document.createElement("button");
+                    dropdownHeader.innerText = "Show Names";
+                    dropdownHeader.onclick = () => {
+                        const isActive = dropdown.classList.toggle("active");
+                        dropdownHeader.innerText = isActive ? "Hide Names" : "Show Names";
+                    };
+
+                    const nameList = document.createElement("ul");
+                    names.forEach(name => {
+                        const listItem = document.createElement("li");
+                        listItem.innerText = name;
+                        nameList.appendChild(listItem);
+                    });
+
+                    dropdown.appendChild(dropdownHeader);
+                    dropdown.appendChild(nameList);
+
+                    const actions = document.createElement("div");
+                    actions.className = "actions";
+                    actions.appendChild(editButton);
+                    actions.appendChild(deleteButton);
+                    actions.appendChild(shuffleButton);
+
+                    setDiv.appendChild(header);
+                    setDiv.appendChild(actions);
+                    setDiv.appendChild(dropdown);
+
+                    container.appendChild(setDiv);
+                }
+            } catch (error) {
+                alert("Error fetching sets: " + error.message);
+            }
+        }
+
+        async function shuffleAndPickWinner(setName) {
+        try {
+            
+            // Redirect to the shuffle page with set name as a query parameter
+            window.location.href = `/shuffle-page?setName=${setName}`;
+        } catch (error) {
+            alert("Error picking winner: " + error.message);
+        }
+    }
+
+        async function deleteSet(setName) {
+            const confirmed = confirm(`Are you sure you want to delete the set: "${setName}"?`);
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch("/delete-set", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ setName }),
+                });
+
+                if (response.ok) {
+                    alert(`Set "${setName}" deleted successfully.`);
+                    fetchSets();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to delete the set: ${errorText}`);
+                }
+            } catch (error) {
+                alert("Error deleting set: " + error.message);
+            }
+        }
+
+        function renamePrompt(oldSetName) {
+            const newSetName = prompt("Enter a new name for the set:", oldSetName);
+            if (!newSetName || newSetName.trim() === "") {
+                alert("Invalid set name.");
+                return;
+            }
+            renameSet(oldSetName, newSetName.trim());
+        }
+
+        async function renameSet(oldSetName, newSetName) {
+            try {
+                const response = await fetch("/edit-set", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ oldSetName, newSetName }),
+                });
+
+                if (response.ok) {
+                    alert(`Set renamed to "${newSetName}" successfully.`);
+                    fetchSets();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to rename the set: ${errorText}`);
+                }
+            } catch (error) {
+                alert("Error renaming set: " + error.message);
+            }
+        }
+
+        async function deleteAllSets() {
+            const confirmed = confirm("Are you sure you want to delete all sets?");
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch("/delete-set", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ setName: 'all' }),
+                });
+
+                if (response.ok) {
+                    alert("All sets deleted successfully.");
+                    fetchSets();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to delete all sets: ${errorText}`);
+                }
+            } catch (error) {
+                alert("Error deleting sets: " + error.message);
+            }
+        }
+
+        fetchSets();
+    </script>
+</body>
+
+</html>

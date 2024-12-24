@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chitti Fund Winner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f0f8ff;
+        }
+        #names-list, #past-sets {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            max-width: 90%;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        #winner {
+            margin-top: 20px;
+            font-weight: bold;
+            color: green;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin: 5px 0;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        footer {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            padding: 20px 10px;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+        }
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .social-icons a {
+            margin: 0 10px;
+            font-size: 18px;
+            color: #fff;
+        }
+        @media (max-width: 600px) {
+            button, input[type="text"] {
+                width: 100%;
+                font-size: 14px;
+            }
+            footer {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Chitti Fund Winner</h1>
+    <p>Enter names one by one, then click "Add Set" to save them as a set.</p>
+    <input type="text" id="name-input" placeholder="Enter a name">
+    <button onclick="addName()">Add Name</button>
+    <div id="names-list">
+        <h3>Names Entered:</h3>
+        <ul id="name-display"></ul>
+    </div>
+    <div class="button-container">
+        <button onclick="saveSet()">Add Set</button>
+        <button onclick="viewSets()">View Sets</button>
+        <button onclick="viewPastSets()">View Past Sets</button>
+    </div>
+
+    <div id="past-sets">
+        <h3>Past Sets</h3>
+        <ul id="past-sets-list"></ul>
+    </div>
+
+    <footer>
+        <div>
+            <p>Follow Me:</p>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/shaiksameer.hussain.12" target="_blank">Facebook</a>
+                <a href="https://www.linkedin.com/in/shaik-sameer-hussain-b88323250/" target="_blank">LinkedIn</a>
+                <a href="https://www.instagram.com/h_shaiksameer" target="_blank">Instagram</a>
+                <a href="https://github.com/Sameerq7" target="_blank">GitHub</a>
+            </div>
+            <p>Contact: <a href="mailto:9121sameer@gmail.com">9121sameer@gmail.com</a> | <a href="tel:+919121700886">+91 9121700886</a></p>
+            <p>&copy; 2024 Chitti Fund Winner. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let names = [];
+        let pastSets = [];
+
+        function addName() {
+            const nameInput = document.getElementById("name-input");
+            const name = nameInput.value.trim();
+            if (name) {
+                names.push(name);
+                updateNamesList();
+                nameInput.value = "";
+            }
+        }
+
+        function updateNamesList() {
+            const nameDisplay = document.getElementById("name-display");
+            nameDisplay.innerHTML = names.map(n => `<li>${n}</li>`).join("");
+        }
+
+        async function saveSet() {
+            if (names.length === 0) {
+                alert("Please enter some names before adding a set.");
+                return;
+            }
+            const response = await fetch("/save-set", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ names }),
+            });
+            if (response.ok) {
+                alert("Set saved successfully!");
+                pastSets.push({ name: names.join(", "), date: new Date().toLocaleString() });
+                updatePastSetsList();
+                names = [];
+                updateNamesList();
+            }
+        }
+
+        function viewSets() {
+            window.location.href = "/view-sets";
+        }
+
+        function viewPastSets() {
+            window.location.href = "past-set.html";
+            // const pastSetsSection = document.getElementById("past-sets");
+            // pastSetsSection.style.display = pastSets.length > 0 ? "block" : "none";
+            // updatePastSetsList();
+        }
+
+        // function updatePastSetsList() {
+        //     const pastSetsList = document.getElementById("past-sets-list");
+        //     pastSetsList.innerHTML = pastSets.map(set => `<li><strong>${set.name}</strong> - ${set.date}</li>`).join("");
+        // }
+    </script>
+</body>
+</html>
