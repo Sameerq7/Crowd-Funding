@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/Favicon-2.jpeg" type="image/jpeg">
+    <title>Edit Set</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f7fc;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        .set-container {
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .member-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .member-row span {
+            flex: 1;
+        }
+
+        .actions button {
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .actions button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-member,
+        .rename-member {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+            margin: 0 10px;
+        }
+
+        .form-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        footer a {
+            color: #0073e6;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Edit Set</h1>
+    <div class="set-container">
+        <h2 id="set-name"></h2>
+        <div id="members-list"></div>
+        <div class="actions">
+            <button onclick="showRenameSetForm()">Rename Set</button>
+            <button onclick="showAddMemberForm()">Add New Member</button>
+            <button onclick="goBack()">Go Back</button>
+        </div>
+        <div class="form-group" id="add-member-form" style="display: none;">
+            <input type="text" id="new-member-name" placeholder="Enter new member name">
+            <button onclick="saveMember()">Save Member</button>
+        </div>
+        <div class="form-group" id="rename-set-form" style="display: none;">
+            <input type="text" id="new-set-name" placeholder="Enter new set name">
+            <button onclick="renameSet()">Rename Set</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Chitti Fund Winner. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const setName = urlParams.get('setName');
+        let sets = {};
+        let selectedSet = [];
+
+        async function fetchSets() {
+            try {
+                const response = await fetch("/get-sets");
+                if (!response.ok) throw new Error("Failed to fetch sets.");
+                sets = await response.json();
+                selectedSet = sets[setName]?.names || [];
+                displaySetDetails();
+            } catch (error) {
+                alert("Error fetching sets: " + error.message);
+            }
+        }
+
+        function displaySetDetails() {
+            document.getElementById("set-name").innerText = setName;
+            const membersList = document.getElementById("members-list");
+            membersList.innerHTML = '';
+            selectedSet.forEach((member, index) => {
+                const memberRow = document.createElement("div");
+                memberRow.className = "member-row";
+                memberRow.innerHTML = `
+                    <span>${member}</span>
+                    <span>
+                        <span class="rename-member" onclick="renameMember(${index})">Rename Member</span>
+                        <span class="delete-member" onclick="deleteMember(${index})">Delete Member</span>
+                    </span>
+                `;
+                membersList.appendChild(memberRow);
+            });
+        }
+
+        function showAddMemberForm() {
+            document.getElementById("add-member-form").style.display = "flex";
+        }
+
+        function saveMember() {
+            const newMember = document.getElementById("new-member-name").value.trim();
+            if (!newMember) {
+                alert("Member name cannot be empty.");
+                return;
+            }
+            selectedSet.push(newMember);
+            updateSetInServer();
+        }
+
+        function renameMember(index) {
+            const oldName = selectedSet[index];
+            const newName = prompt("Enter the new name for the member:", oldName);
+            if (newName && newName.trim() !== "") {
+                selectedSet[index] = newName.trim();
+                updateSetInServer();
+            } else {
+                alert("Invalid member name.");
+            }
+        }
+
+        function deleteMember(index) {
+            selectedSet.splice(index, 1);
+            updateSetInServer();
+        }
+
+        function showRenameSetForm() {
+            document.getElementById("rename-set-form").style.display = "flex";
+        }
+
+        async function renameSet() {
+            const newSetName = document.getElementById("new-set-name").value.trim();
+            if (!newSetName || newSetName === setName) {
+                alert("Invalid set name.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/edit-set", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        oldSetName: setName,
+                        newSetName: newSetName,
+                        members: selectedSet
+                    }),
+                });
+
+                if (response.ok) {
+                    alert("Set renamed successfully.");
+                    window.location.href = `?setName=${newSetName}`;
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to rename set: ${errorText}`);
+                }
+            } catch (error) {
+                alert("Error renaming set: " + error.message);
+            }
+        }
+
+        async function updateSetInServer() {
+            try {
+                const response = await fetch("/edit-set", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        oldSetName: setName,
+                        members: selectedSet
+                    }),
+                });
+
+                if (response.ok) {
+                    alert("Changes saved successfully.");
+                    displaySetDetails();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to save changes: ${errorText}`);
+                }
+            } catch (error) {
+                alert("Error saving changes: " + error.message);
+            }
+        }
+
+        function goBack() {
+            window.location.href = "/";
+        }
+
+        window.onload = fetchSets;
+    </script>
+</body>
+
+</html>

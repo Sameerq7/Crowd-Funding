@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/Favicon-2.jpeg" type="image/jpeg">
-
     <title>View Sets</title>
     <style>
         /* Global Styles */
@@ -45,14 +44,15 @@
         }
 
         .set h3 {
-            color: #000000;
+            color: #000;
             margin-bottom: 15px;
             font-size: 24px;
         }
 
         .actions {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-top: 15px;
         }
 
@@ -74,6 +74,24 @@
         .actions button:focus {
             outline: none;
         }
+
+        .name-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-left: 0;
+            margin-top: 10px;
+            list-style: none;
+        }
+
+        .name-list li {
+            background: #f1f1f1;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
 
         .dropdown {
             margin-top: 10px;
@@ -176,6 +194,7 @@
             0% {
                 opacity: 0;
             }
+
             100% {
                 opacity: 1;
             }
@@ -190,7 +209,6 @@
 
             .actions button {
                 width: 100%;
-                margin-bottom: 10px;
             }
 
             footer .social-icons a {
@@ -218,7 +236,8 @@
                 <a href="https://www.instagram.com/h_shaiksameer" target="_blank">Instagram</a>
                 <a href="https://github.com/Sameerq7" target="_blank">GitHub</a>
             </div>
-            <p>Contact: <a href="mailto:9121sameer@gmail.com">9121sameer@gmail.com</a> | <a href="tel:+919121700886">+91 9121700886</a></p>
+            <p>Contact: <a href="mailto:9121sameer@gmail.com">9121sameer@gmail.com</a> | <a href="tel:+919121700886">+91
+                    9121700886</a></p>
             <p>&copy; 2024 Chitti Fund Winner. All rights reserved.</p>
         </div>
     </footer>
@@ -232,7 +251,6 @@
                 const container = document.getElementById("sets-container");
                 container.innerHTML = "";
 
-                // Sort the sets by timestamp (most recent first)
                 const sortedSets = Object.entries(data).sort(([a], [b]) => b.localeCompare(a));
 
                 for (const [setName, names] of sortedSets) {
@@ -242,17 +260,22 @@
                     const header = document.createElement("h3");
                     header.innerText = setName;
 
-                    const editButton = document.createElement("button");
-                    editButton.innerText = "Rename";
-                    editButton.onclick = () => renamePrompt(setName);
+                    const actions = document.createElement("div");
+                    actions.className = "actions";
 
-                    const deleteButton = document.createElement("button");
-                    deleteButton.innerText = "Delete";
-                    deleteButton.onclick = () => deleteSet(setName);
+                    const buttons = [
+                        { text: "Rename Set", onClick: () => renamePrompt(setName) },
+                        { text: "Edit Set", onClick: () => window.location.href = `/edit-set.html?setName=${setName}` },
+                        { text: "Delete", onClick: () => deleteSet(setName) },
+                        { text: "Shuffle & Pick Winner", onClick: () => shuffleAndPickWinner(setName) },
+                    ];
 
-                    const shuffleButton = document.createElement("button");
-                    shuffleButton.innerText = "Shuffle & Pick Winner";
-                    shuffleButton.onclick = () => shuffleAndPickWinner(setName);
+                    buttons.forEach(({ text, onClick }) => {
+                        const button = document.createElement("button");
+                        button.innerText = text;
+                        button.onclick = onClick;
+                        actions.appendChild(button);
+                    });
 
                     const dropdown = document.createElement("div");
                     dropdown.className = "dropdown";
@@ -265,7 +288,13 @@
                     };
 
                     const nameList = document.createElement("ul");
-                    names.forEach(name => {
+                    nameList.className = "name-list";  // Add class to style it as a row
+
+                    // Handle data that could either be an array or an object
+                    const namesArray = Array.isArray(names) ? names : Object.values(names);
+
+                    // Create list items for each name
+                    namesArray.forEach(name => {
                         const listItem = document.createElement("li");
                         listItem.innerText = name;
                         nameList.appendChild(listItem);
@@ -274,11 +303,9 @@
                     dropdown.appendChild(dropdownHeader);
                     dropdown.appendChild(nameList);
 
-                    const actions = document.createElement("div");
-                    actions.className = "actions";
-                    actions.appendChild(editButton);
-                    actions.appendChild(deleteButton);
-                    actions.appendChild(shuffleButton);
+                    // Assuming you append this dropdown to an existing element in your DOM
+                    document.body.appendChild(dropdown);
+
 
                     setDiv.appendChild(header);
                     setDiv.appendChild(actions);
@@ -291,17 +318,33 @@
             }
         }
 
-        async function shuffleAndPickWinner(setName) {
+        async function renamePrompt(setName) {
+            const newSetName = prompt("Enter a new name for the set:", setName);
+            if (!newSetName?.trim()) return alert("Invalid set name.");
+            renameSet(setName, newSetName.trim());
+        }
+
+        async function renameSet(oldName, newName) {
             try {
-                window.location.href = `/shuffle-page?setName=${setName}`;
+                const response = await fetch("/rename-set", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ oldSetName: oldName, newSetName: newName }),
+                });
+
+                if (response.ok) {
+                    alert(`Set renamed to "${newName}" successfully.`);
+                    fetchSets();
+                } else {
+                    alert(`Failed to rename the set: ${await response.text()}`);
+                }
             } catch (error) {
-                alert("Error picking winner: " + error.message);
+                alert("Error renaming set: " + error.message);
             }
         }
 
         async function deleteSet(setName) {
-            const confirmed = confirm(`Are you sure you want to delete the set: "${setName}"?`);
-            if (!confirmed) return;
+            if (!confirm(`Are you sure you want to delete the set: "${setName}"?`)) return;
 
             try {
                 const response = await fetch("/delete-set", {
@@ -314,46 +357,19 @@
                     alert(`Set "${setName}" deleted successfully.`);
                     fetchSets();
                 } else {
-                    const errorText = await response.text();
-                    alert(`Failed to delete the set: ${errorText}`);
+                    alert(`Failed to delete the set: ${await response.text()}`);
                 }
             } catch (error) {
                 alert("Error deleting set: " + error.message);
             }
         }
 
-        function renamePrompt(oldSetName) {
-            const newSetName = prompt("Enter a new name for the set:", oldSetName);
-            if (!newSetName || newSetName.trim() === "") {
-                alert("Invalid set name.");
-                return;
-            }
-            renameSet(oldSetName, newSetName.trim());
-        }
-
-        async function renameSet(oldSetName, newSetName) {
-            try {
-                const response = await fetch("/edit-set", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ oldSetName, newSetName }),
-                });
-
-                if (response.ok) {
-                    alert(`Set renamed to "${newSetName}" successfully.`);
-                    fetchSets();
-                } else {
-                    const errorText = await response.text();
-                    alert(`Failed to rename the set: ${errorText}`);
-                }
-            } catch (error) {
-                alert("Error renaming set: " + error.message);
-            }
+        async function shuffleAndPickWinner(setName) {
+            window.location.href = `/shuffle-page?setName=${setName}`;
         }
 
         async function deleteAllSets() {
-            const confirmed = confirm("Are you sure you want to delete all sets?");
-            if (!confirmed) return;
+            if (!confirm("Are you sure you want to delete all sets?")) return;
 
             try {
                 const response = await fetch("/delete-set", {
@@ -366,15 +382,14 @@
                     alert("All sets deleted successfully.");
                     fetchSets();
                 } else {
-                    const errorText = await response.text();
-                    alert(`Failed to delete all sets: ${errorText}`);
+                    alert(`Failed to delete all sets: ${await response.text()}`);
                 }
             } catch (error) {
                 alert("Error deleting sets: " + error.message);
             }
         }
 
-        fetchSets();
+        window.onload = fetchSets;
     </script>
 </body>
 

@@ -121,12 +121,11 @@ app.get("/get-past-sets", (req, res) => {
     .catch(error => res.status(500).json({ error: "Failed to retrieve past sets" }));
 });
 
-
 app.post("/edit-set", (req, res) => {
     const { oldSetName, newSetName, members, deleteMembers, renameMembers } = req.body;
 
     if (!oldSetName) {
-        return res.status(400).json({ error: "'oldSetName' is required." });
+        return res.status(400).send("Invalid request. 'oldSetName' is required.");
     }
 
     const oldSetRef = ref(db, 'sets/' + oldSetName);
@@ -134,74 +133,53 @@ app.post("/edit-set", (req, res) => {
     get(oldSetRef)
         .then(snapshot => {
             if (snapshot.exists()) {
-                
-                let currentSetData = snapshot.val();
+                const currentSetData = snapshot.val();
                 let currentMembers = currentSetData.names || [];
 
-                // Rename the set if newSetName is provided
-                const renameSet = newSetName && newSetName !== oldSetName;
-
                 // Delete members
-                if (deleteMembers && Array.isArray(deleteMembers)) {
-                    // Ensure members to be deleted are removed from the current set
+                if (deleteMembers && Array.isArray(deleteMembers) && deleteMembers.length > 0) {
                     currentMembers = currentMembers.filter(member => !deleteMembers.includes(member));
                 }
-        
+
                 // Rename members
                 if (renameMembers && Array.isArray(renameMembers)) {
                     renameMembers.forEach(({ oldName, newName }) => {
                         const memberIndex = currentMembers.indexOf(oldName);
                         if (memberIndex !== -1) {
                             currentMembers[memberIndex] = newName;  // Rename the member
-                        } else {
-                            console.error(`Member ${oldName} not found in set.`);
                         }
                     });
                 }
 
                 // Add new members
-                if (members && Array.isArray(members)) {
+                if (members && Array.isArray(members) && members.length > 0) {
                     members.forEach(member => {
                         if (!currentMembers.includes(member)) {
-                            currentMembers.push(member);
+                            currentMembers.push(member); // Add new member if not already in the set
                         }
                     });
                 }
 
-                // Prepare data to save
-                const updatedSetData = { names: currentMembers };
-
-                if (renameSet) {
-                    // Delete old set and create new set with updated data
-                    const newSetRef = ref(db, 'sets/' + newSetName);
-                    const updates = {};
-                    updates[`sets/${newSetName}`] = updatedSetData;
-                    updates[`sets/${oldSetName}`] = null;
-
-                    update(ref(db), updates)
-                        .then(() => res.status(200).send("Set renamed and updated successfully."))
-                        .catch(error => {
-                            console.error("Error renaming set:", error);
-                            res.status(500).json({ error: "Failed to rename set." });
-                        });
-                } else {
-                    // Update existing set
-                    set(oldSetRef, updatedSetData)
-                        .then(() => res.status(200).send("Set updated successfully."))
-                        .catch(error => {
-                            console.error("Error updating set:", error);
-                            res.status(500).json({ error: "Failed to update set." });
-                        });
-                }
+                // Save updated set with members
+                set(oldSetRef, { names: currentMembers })
+                    .then(() => {
+                        res.status(200).send("Set updated successfully.");
+                    })
+                    .catch(error => {
+                        console.error("Error updating set:", error);
+                        res.status(500).json({ error: "Failed to update set" });
+                    });
             } else {
-                res.status(404).json({ error: "Set not found." });
+                res.status(404).send("Set not found.");
             }
         })
         .catch(error => {
             console.error("Error retrieving set:", error);
-            res.status(500).json({ error: "Failed to retrieve set." });
+            res.status(500).json({ error: "Error retrieving set" });
         });
 });
+
+
 
 // Delete a set or all sets
 app.post("/delete-set", (req, res) => {
