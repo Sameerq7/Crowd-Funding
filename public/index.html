@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,34 +8,205 @@
 
     <title>Chitti Fund Winner</title>
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            background-color: #f0f8ff;
-            transition: background-color 0.3s ease;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            /* Static gradient */
+            color: #ffffff;
         }
+
         h1 {
             text-align: center;
-            color: #007bff;
             font-size: 2.5rem;
-            margin-bottom: 20px;
-            animation: fadeIn 1s ease-in-out;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: fadeIn 2s ease-out;
         }
-        #names-list, #past-sets {
-            margin-top: 10px;
-            padding: 15px;
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 30px;
+            text-align: center;
+            color: #ffcc00;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            animation: slideIn 1.5s ease-out;
+        }
+
+        /* Forms and Inputs */
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: 90%;
+            border: 1px solid #fff;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ffcc00;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
+            background: linear-gradient(90deg, #ff7b00, #ffcc00);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7);
+            cursor: pointer;
+            transition: transform 0.3s, background 0.5s;
+            display: inline-block;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background: linear-gradient(90deg, #ffcc00, #ff7b00);
+        }
+
+        /* Containers */
+        /* Updated Styles for Names List and Past Sets */
+        #names-list,
+        #past-sets {
+            margin-top: 20px;
+            padding: 20px;
             border: 1px solid #ddd;
             max-width: 90%;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            /* Darker background for contrast */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            /* More prominent shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            /* Prevent overflow of content */
+            animation: fadeInUp 1s ease-out;
         }
-        #names-list:hover, #past-sets:hover {
+
+        #names-list:hover,
+        #past-sets:hover {
             transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            /* Enhance shadow on hover */
         }
+
+        #past-sets h3,
+        #names-list h3 {
+            text-align: center;
+            font-size: 1.6rem;
+            color: #ffcc00;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Past Set Item Layout */
+        #past-sets ul,
+        #names-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            animation: slideInUp 1s ease-out;
+        }
+
+        #past-sets li,
+        #names-list li {
+            margin-bottom: 12px;
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        #past-sets li:hover,
+        #names-list li:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(10px);
+            cursor: pointer;
+        }
+
+        #past-sets li strong {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ffcc00;
+        }
+
+        #past-sets li em {
+            font-style: italic;
+            color: #ffffff;
+        }
+
+        #past-sets .view-set-btn,
+        #names-list .view-set-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-top: 10px;
+            background-color: #ffcc00;
+            color: #333;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            margin-left: auto;
+        }
+
+        #past-sets .view-set-btn:hover,
+        #names-list .view-set-btn:hover {
+            background-color: #ff7b00;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
         #winner {
             margin-top: 20px;
             font-weight: bold;
@@ -42,6 +214,8 @@
             font-size: 1.3rem;
             animation: bounce 1s infinite alternate;
         }
+
+        /* Button Container */
         .button-container {
             margin-top: 20px;
             display: flex;
@@ -49,33 +223,8 @@
             gap: 10px;
             animation: fadeInUp 1s ease-out;
         }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-3px);
-        }
-        input[type="text"] {
-            padding: 10px;
-            margin: 5px 0;
-            width: 90%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus {
-            border-color: #007bff;
-        }
+
+        /* Footer */
         footer {
             width: 100%;
             background-color: #000;
@@ -87,50 +236,45 @@
             position: relative;
             animation: fadeInUp 1.5s ease-out;
         }
+
         footer a {
-            color: #007bff;
+            color: #ffcc00;
             text-decoration: none;
         }
+
         footer a:hover {
             text-decoration: underline;
         }
+
         .social-icons a {
             margin: 0 10px;
             font-size: 20px;
             color: #fff;
             transition: color 0.3s ease;
         }
+
         .social-icons a:hover {
-            color: #007bff;
-        }
-        @media (max-width: 600px) {
-            button, input[type="text"] {
-                width: 100%;
-                font-size: 14px;
-            }
-            footer {
-                font-size: 12px;
-            }
+            color: #ffcc00;
         }
 
         /* Animations */
         @keyframes fadeIn {
-            0% {
+            from {
                 opacity: 0;
-                transform: translateY(-20px);
             }
-            100% {
+
+            to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
         @keyframes fadeInUp {
-            0% {
+            from {
                 opacity: 0;
                 transform: translateY(20px);
             }
-            100% {
+
+            to {
                 opacity: 1;
                 transform: translateY(0);
             }
@@ -140,18 +284,21 @@
             0% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(-10px);
             }
+
             100% {
                 transform: translateY(0);
             }
         }
     </style>
 </head>
+
 <body>
     <h1>Chitti Fund Winner</h1>
-    <p>Enter names one by one, then click "Add Set" to save them as a set.</p>
+    <p>  Enter names one by one, then click "Add Set" to save them as a set.</p>
     <input type="text" id="name-input" placeholder="Enter a name">
     <button onclick="addName()">Add Name</button>
     <div id="names-list">
@@ -178,7 +325,8 @@
                 <a href="https://www.instagram.com/h_shaiksameer" target="_blank">Instagram</a>
                 <a href="https://github.com/Sameerq7" target="_blank">GitHub</a>
             </div>
-            <p>Contact: <a href="mailto:9121sameer@gmail.com">9121sameer@gmail.com</a> | <a href="tel:+919121700886">+91 9121700886</a></p>
+            <p>Contact: <a href="mailto:9121sameer@gmail.com">9121sameer@gmail.com</a> | <a href="tel:+919121700886">+91
+                    9121700886</a></p>
             <p>&copy; 2024 Chitti Fund Winner. All rights reserved.</p>
         </div>
     </footer>
@@ -192,10 +340,10 @@
             if (response.ok) {
                 const data = await response.json();
                 pastSets = Object.keys(data).map(key => {
-                    return { 
-                        setId: key, 
-                        names: data[key], 
-                        date: new Date(parseInt(key.replace('set-', ''))).toLocaleString() 
+                    return {
+                        setId: key,
+                        names: data[key],
+                        date: new Date(parseInt(key.replace('set-', ''))).toLocaleString()
                     };
                 });
 
@@ -274,9 +422,10 @@
             window.location.href = "past-set.html";
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             loadPastSets(); // Load past sets when the page is loaded
         });
     </script>
 </body>
+
 </html>
